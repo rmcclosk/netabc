@@ -315,22 +315,40 @@ struct prior_data *read_priors(FILE *f, net_type net)
                 }
                 else if (seq) {
                     if (seq_cur == 0) {
-                        if (strcmp(event.data.scalar.value, "uniform") == 0) {
-                            pdata->dist[param] = UNIFORM;
-                            pdata->params[param] = malloc(2 * sizeof(double));
-                        }
-                        else if (strcmp(event.data.scalar.value, "gaussian") == 0) {
-                            pdata->dist[param] = GAUSSIAN;
-                            pdata->params[param] = malloc(2 * sizeof(double));
-                        }
-                        else if (strcmp(event.data.scalar.value, "delta") == 0) {
-                            pdata->dist[param] = DELTA;
-                            pdata->params[param] = malloc(sizeof(double));
-                        }
-                        else {
-                            fprintf(stderr, "Error: unrecognized distribution \"%s\"\n",
+                        pdata->dist[param] = parse_distribution(event.data.scalar.value);
+                        if (pdata->dist[param] == 0) {
+                            fprintf(stderr, "ERROR: unrecognized distribution \"%s\"\n",
                                     event.data.scalar.value);
                             exit(EXIT_FAILURE);
+                        }
+                        switch (pdata->dist[param]) {
+                            case DELTA:
+                                pdata->params[param] = malloc(sizeof(double));
+                                break;
+                            case UNIFORM:
+                            case GAUSSIAN:
+                            case EXPONENTAL:
+                            case LAPLACE:
+                            case CAUCHY:
+                            case RAYLEIGH:
+                            case GAMMA:
+                            case LOGNORMAL:
+                            case CHI_SQUARED:
+                            case STUDENT_T:
+                            case LOGISTIC:
+                            case PARETO:
+                                pdata->params[param] = malloc(2 * sizeof(double));
+                                break;
+                            case F:
+                            case WEIBULL:
+                                pdata->params[param] = malloc(3 * sizeof(double));
+                                break;
+                            case BETA:
+                                pdata->params[param] = malloc(4 * sizeof(double));
+                                break;
+                            default:
+                                fprintf(stderr, "BUG: unrecognized distribution %d\n", pdata->dist[param]);
+                                exit(EXIT_FAILURE);
                         }
                     }
                     else {

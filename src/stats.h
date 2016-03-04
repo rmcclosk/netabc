@@ -20,7 +20,13 @@ typedef enum {
     RAYLEIGH = 8,
     GAMMA = 9,
     LOGNORMAL = 10,
-    CHI_SQUARED = 11
+    CHI_SQUARED = 11,
+    F = 12,
+    STUDENT_T = 13,
+    BETA = 14,
+    LOGISTIC = 15,
+    PARETO = 16,
+    WEIBULL = 17
 } distribution;
 
 /** Calculate a likelihood ratio test.
@@ -82,4 +88,16 @@ void sample_distribution(int n, double *theta, gsl_rng *rng,
  */
 double density_distribution(int n, const double *theta, 
                             const distribution *dist, double **params);
+
+/** Parse a distribution from a string.
+ *
+ * This takes a string (like "exponential") and return the corresponding
+ * element of the distribution enum, or 0 if the string does not match any
+ * known distribution.
+ *
+ * \param[in] s string to parse
+ * \return the distribution named by s
+ */
+distribution parse_distribution(const char *s);
+
 #endif
