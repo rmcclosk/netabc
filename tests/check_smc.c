@@ -72,127 +72,66 @@ smc_functions toy_functions = {
     .prior_density = toy_prior_density
 };
 
-void plot(const double *x, const double *y, int nx, const char *pdf, 
-          const char *plot_cmd)
+void write_tsv(char **hdr, double **data, int nrow, int ncol, const char *fn)
 {
-    int i, fd;
-    char fn[BUFSIZ], cmd[BUFSIZ];
+    int i, j;
+    FILE *f = fopen(fn, "w");
 
-    sprintf(fn, "%s/smcXXXXXX", P_tmpdir);
-    fd = mkstemp(fn);
-    for (i = 0; i < nx; ++i) {
-        if (y) {
-            dprintf(fd, "%e\t%e\n", x[i], y[i]);
-        } 
-        else {
-            dprintf(fd, "%e\n", x[i]);
-        }
+    for (i = 0; i < ncol-1; ++i) {
+        fprintf(f, "%s\t", hdr[i]);
     }
-    close(fd);
-    
-    sprintf(cmd, "R --vanilla --silent -e 'd <- read.table(\"%s\")' ", fn);
-    sprintf(cmd, "%s -e 'pdf(\"%s\")' ", cmd, pdf);
-    sprintf(cmd, "%s -e '%s' ", cmd, plot_cmd);
-    sprintf(cmd, "%s -e 'dev.off()'\n", cmd);
-    i = system(cmd);
+    fprintf(f, "%s\n", hdr[ncol-1]);
 
-    unlink(fn);
+    for (i = 0; i < nrow; ++i) {
+        for (j = 0; j < ncol-1; ++j) {
+            fprintf(f, "%e\t", data[j][i]);
+        } 
+        fprintf(f, "%e\n", data[ncol-1][i]);
+    }
+    fclose(f);
 }
 
 Suite *smc_suite(void);
 
 START_TEST (test_smc_toy)
 {
-    double y = 0;
-    int i, fd;
+    double y;
+    int i;
+    char *hdr[2] = {"theta", ""};
+    double *data[2];
+    FILE *trace = fopen("check_smc_trace.tsv", "w");
 
     smc_config config = {
-        .nparam = 1,
-        .nparticle = 10000,
-        .nsample = 5,
-        .ess_tolerance = 5000,
-        .final_epsilon = 0.01,
-        .quality = 0.95,
-        .step_tolerance = 1e-9,
-        .dataset_size = sizeof(double),
-        .feedback_size = sizeof(double)
-    };
-
-    smc_result *res = abc_smc(config, toy_functions, 0, 1, (void *) &y, NULL);
-
-    for (i = 0; i < config.nparticle; ++i) {
-        ck_assert(res->theta[res->niter][i] > -10 && res->theta[res->niter][i] < 10);
-    }
-
-    plot(res->theta[res->niter], NULL, config.nparticle, "check_smc_hist.pdf",
-         "plot(density(d[,1]), xlim=c(-3, 3), ylim=c(0, 2.5), xlab=\"theta\", ylab=\"density\", main=NA); polygon(density(d[,1]), col=\"gray\"); x <- seq(-3, 3, 0.01); lines(x, 0.5*dnorm(x, sd=1) + 0.5*dnorm(x, sd=0.1))");
-    smc_result_free(res);
-}
-END_TEST
-
-START_TEST (test_smc_toy_steps)
-{
-    int i;
-    double y = 0;
-    smc_config toy_config = {
         .nparam = 1,
         .nparticle = 10000,
         .nsample = 1,
         .ess_tolerance = 5000,
         .final_epsilon = 0.01,
         .quality = 0.95,
-        .step_tolerance = 1e-5,
-        .dataset_size = sizeof(double),
-        .feedback_size = sizeof(double)
-    };
-
-    smc_result *res = abc_smc(toy_config, toy_functions, 0, 8, (void *) &y, NULL);
-
-    // same number of steps as in Del Moral 2012
-    ck_assert(res->niter > 120 && res->niter < 140);
-    plot(&res->epsilon[1], NULL, res->niter-1, "check_smc_epsilon.pdf", 
-         "plot(d[,1], xlab=\"time index\", ylab=\"epsilon\", main=NA, type=\"l\")");
-    plot(&res->acceptance_rate[1], NULL, res->niter-1, "check_smc_accept.pdf", 
-         "plot(d[,1], xlab=\"time index\", ylab=\"acceptance rate\", main=NA, type=\"l\")");
-    smc_result_free(res);
-}
-END_TEST
-
-START_TEST (test_smc_distance)
-{
-    double y = 0;
-    int i, fd;
-    char fn[] = "/tmp/test_smc_distance", cmd[BUFSIZ];
-    FILE *trace = fopen(fn, "w+");
-
-    smc_config config = {
-        .nparam = 1,
-        .nparticle = 1000,
-        .nsample = 2,
-        .ess_tolerance = 500,
-        .final_epsilon = 0.0,
-        .final_accept_rate = 0.015,
-        .quality = 0.95,
         .step_tolerance = 1e-9,
         .dataset_size = sizeof(double),
         .feedback_size = sizeof(double)
     };
 
-    fprintf(trace, "iter\tweight\ttheta\tX0\tX1\n");
+    fprintf(trace, "iter\tweight\ttheta\tX0\n");
     smc_result *res = abc_smc(config, toy_functions, 0, 1, (void *) &y, trace);
-    fflush(trace);
-    fseek(trace, 0L, SEEK_SET);
-
-    sprintf(cmd, "R --vanilla --silent -e 'd <- read.table(\"%s\", header=TRUE)' ", fn);
-    sprintf(cmd, "%s -e 'library(ggplot2) ' ", cmd);
-    sprintf(cmd, "%s -e 'd <- subset(d, iter %%%% 11 == 0) ' ", cmd);
-    sprintf(cmd, "%s -e 'pdf(\"check_smc_distance.pdf\")' ", cmd);
-    sprintf(cmd, "%s -e 'ggplot(d, aes(x=abs(theta), y=X0)) + geom_point() + facet_wrap(~iter) + theme_bw()' ", cmd);
-    sprintf(cmd, "%s -e 'dev.off()'\n", cmd);
-    i = system(cmd);
-
     fclose(trace);
-    unlink(fn);
+
+    for (i = 0; i < config.nparticle; ++i) {
+        ck_assert(res->theta[res->niter][i] > -10 && res->theta[res->niter][i] < 10);
+    }
+    data[0] = res->theta[res->niter];
+    write_tsv(hdr, data, config.nparticle, 1, "check_smc_theta.tsv");
+
+    // approx. same number of steps as in Del Moral 2012
+    ck_assert(res->niter > 120 && res->niter < 140);
+    data[0] = &res->epsilon[1];
+    data[1] = &res->acceptance_rate[1];
+    hdr[0] = "epsilon";
+    hdr[1] = "acceptance_rate";
+    write_tsv(hdr, data, res->niter-1, 2, "check_smc_iter.tsv");
+
+    smc_result_free(res);
 }
 END_TEST
 
@@ -205,8 +144,6 @@ Suite *smc_suite(void)
 
     tc_smc = tcase_create("Core");
     tcase_add_test(tc_smc, test_smc_toy);
-    tcase_add_test(tc_smc, test_smc_toy_steps);
-    tcase_add_test(tc_smc, test_smc_distance);
     tcase_set_timeout(tc_smc, 60);
     suite_add_tcase(s, tc_smc);
 

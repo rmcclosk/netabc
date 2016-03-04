@@ -327,7 +327,7 @@ struct prior_data *read_priors(FILE *f, net_type net)
                                 break;
                             case UNIFORM:
                             case GAUSSIAN:
-                            case EXPONENTAL:
+                            case EXPONENTIAL:
                             case LAPLACE:
                             case CAUCHY:
                             case RAYLEIGH:
