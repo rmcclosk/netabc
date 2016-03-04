@@ -54,10 +54,14 @@ the below table consistent with the Wikipedia page.
 
 distribution | parameters
 -------------|-----------
-uniform | $a$ (lower limit), $b$ (upper limit)
-gaussian | $\mu$ (mean), $\sigma$ variance
+uniform | _a_ (lower limit), _b_ (upper limit)
+gaussian | _μ_ (mean), _σ_ (variance)
 delta | shift
-exponential | shift, $\lambda$ (rate)
-laplace | $\mu$ (location), $b$ (scale)
-exponential_power | $\mu$ (location), $\alpha$ (scale), $\beta$ (shape)
-cauchy | $x_0$ (location), $\gamma$ (scale)
+exponential | shift, _λ_ (rate)
+laplace | _μ_ (location), _b_ (scale)
+exponential_power | _μ_ (location), α (scale), β (shape)
+cauchy | _x<sub>0</sub>_ (location), _γ_ (scale)
+rayleigh | shift, _σ_ (scale)
+gamma | _k_ (shape), _θ_ (scale)
+lognormal | _μ_ (location), _σ_ (scale) 
+chi_squared | shift, _k_ (degrees of freedom)

@@ -50,7 +50,19 @@ void sample_distribution(int n, double *theta, gsl_rng *rng,
                 theta[i] += gsl_ran_exppow(rng, params[i][1], params[i][2]);
                 break;
             case CAUCHY:
-                theta[i] += gsl_ran_cauchi(rng, params[i][1]);
+                theta[i] += gsl_ran_cauchy(rng, params[i][1]);
+                break;
+            case RAYLEIGH:
+                theta[i] += gsl_ran_rayleigh(rng, params[i][1]);
+                break;
+            case GAMMA:
+                theta[i] = gsl_ran_gamma(rng, params[i][0], params[i][1]);
+                break;
+            case LOGNORMAL:
+                theta[i] = gsl_ran_lognormal(rng, params[i][0], params[i][1]);
+                break;
+            case CHI_SQUARED:
+                theta[i] += gsl_ran_chisq(rng, params[i][1]);
                 break;
             default:
                 fprintf(stderr, "BUG: tried to sample from unknown distribution\n");

@@ -16,7 +16,11 @@ typedef enum {
     EXPONENTIAL = 4,
     LAPLACE = 5,
     EXPONENTIAL_POWER = 6,
-    CAUCHY = 7
+    CAUCHY = 7,
+    RAYLEIGH = 8,
+    GAMMA = 9,
+    LOGNORMAL = 10,
+    CHI_SQUARED = 11
 } distribution;
 
 /** Calculate a likelihood ratio test.
