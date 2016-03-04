@@ -12,7 +12,11 @@ typedef enum {
 typedef enum {
     UNIFORM = 1,
     GAUSSIAN = 2,
-    DELTA = 3
+    DELTA = 3,
+    EXPONENTIAL = 4,
+    LAPLACE = 5,
+    EXPONENTIAL_POWER = 6,
+    CAUCHY = 7
 } distribution;
 
 /** Calculate a likelihood ratio test.

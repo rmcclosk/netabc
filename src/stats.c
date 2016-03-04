@@ -29,16 +29,28 @@ void sample_distribution(int n, double *theta, gsl_rng *rng,
 
     for (i = 0; i < n; ++i)
     {
+        theta[i] = params[i][0];
         switch (dist[i])
         {
             case UNIFORM:
-                theta[i] = gsl_ran_flat(rng, params[i][0], params[i][1]);
+                theta[i] += gsl_ran_flat(rng, 0, params[i][1] - params[i][0]);
                 break;
             case GAUSSIAN:
-                theta[i] = params[i][0] + gsl_ran_gaussian(rng, params[i][1]);
+                theta[i] += gsl_ran_gaussian(rng, params[i][1]);
                 break;
             case DELTA:
-                theta[i] = params[i][0];
+                break;
+            case EXPONENTIAL:
+                theta[i] += gsl_ran_exponential(rng, 1.0 / params[i][1]);
+                break;
+            case LAPLACE:
+                theta[i] += gsl_ran_laplace(rng, params[i][1]);
+                break;
+            case EXPONENTIAL_POWER:
+                theta[i] += gsl_ran_exppow(rng, params[i][1], params[i][2]);
+                break;
+            case CAUCHY:
+                theta[i] += gsl_ran_cauchi(rng, params[i][1]);
                 break;
             default:
                 fprintf(stderr, "BUG: tried to sample from unknown distribution\n");
