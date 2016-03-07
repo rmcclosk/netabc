@@ -1,6 +1,3 @@
 [submodule "igraph"]
 	path = igraph
 	url = https://github.com/rmcclosk/igraph
-[submodule "judy"]
-	path = judy
-	url = git@github.com:felix-lang/judy.git

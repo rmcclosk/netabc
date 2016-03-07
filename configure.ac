@@ -37,21 +37,9 @@ AX_PTHREAD([], [AC_MSG_ERROR([pthtreads is required])])
 AC_CHECK_LIB([m], [cos], [], [AC_MSG_ERROR([math.h is required])])
 AC_CHECK_LIB([gslcblas], [cblas_dgemm], [], [AC_MSG_ERROR([GSL CBLAS is required])])
 AC_CHECK_LIB([Judy], [JudyLIns], [], [AC_MSG_ERROR([Judy is required])])
+AC_CHECK_LIB([yaml], [yaml_parser_initialize], [], [AC_MSG_ERROR([libyaml is required])])
 PKG_CHECK_MODULES([GSL], [gsl >= 1.15])
 PKG_CHECK_MODULES([CHECK], [check >= 0.9.4])
-
-AC_ARG_WITH([external-yaml], 
-            [AS_HELP_STRING([--with-external-yaml], [Use external libyaml [default=no]])],
-            [internal_yaml=no],                                                  
-            [internal_yaml=yes])
-
-if test "$internal_yaml" = "no"; then
-    AC_CHECK_LIB([yaml], [yaml_parser_initialize], [], [AC_MSG_ERROR([libyaml is required])])
-else
-    AC_DEFINE([INTERNAL_YAML], [1], [Define to 1 in you use the internal libyaml library])
-fi
-
-AM_CONDITIONAL(INTERNAL_YAML, test x$internal_yaml = xyes)
 
 # Checks for header files.
 AC_HEADER_STDC
