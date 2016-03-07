@@ -4,9 +4,10 @@
 AC_PREREQ([2.69])
 AC_INIT(netabc, 0.1, rmccloskey@cfenet.ubc.ca)
 AC_CONFIG_SRCDIR([src/netabc.c])
+AC_CONFIG_SUBDIRS([igraph])
 AC_CONFIG_MACRO_DIR([m4])
 
-AM_INIT_AUTOMAKE([-Wall -Werror subdir-objects foreign 1.9.6])
+AM_INIT_AUTOMAKE([-Wall subdir-objects foreign 1.9.6])
 
 # Checks for programs.
 AC_PROG_CC
@@ -35,11 +36,22 @@ AX_GCC_FUNC_ATTRIBUTE([noreturn])
 AX_PTHREAD([], [AC_MSG_ERROR([pthtreads is required])])
 AC_CHECK_LIB([m], [cos], [], [AC_MSG_ERROR([math.h is required])])
 AC_CHECK_LIB([gslcblas], [cblas_dgemm], [], [AC_MSG_ERROR([GSL CBLAS is required])])
-AC_CHECK_LIB([igraph], [igraph_empty], [], [AC_MSG_ERROR([igraph is required])])
 AC_CHECK_LIB([Judy], [JudyLIns], [], [AC_MSG_ERROR([Judy is required])])
-AC_CHECK_LIB([yaml], [yaml_parser_initialize], [], [AC_MSG_ERROR([libyaml is required])])
 PKG_CHECK_MODULES([GSL], [gsl >= 1.15])
 PKG_CHECK_MODULES([CHECK], [check >= 0.9.4])
+
+AC_ARG_WITH([external-yaml], 
+            [AS_HELP_STRING([--with-external-yaml], [Use external libyaml [default=no]])],
+            [internal_yaml=no],                                                  
+            [internal_yaml=yes])
+
+if test "$internal_yaml" = "no"; then
+    AC_CHECK_LIB([yaml], [yaml_parser_initialize], [], [AC_MSG_ERROR([libyaml is required])])
+else
+    AC_DEFINE([INTERNAL_YAML], [1], [Define to 1 in you use the internal libyaml library])
+fi
+
+AM_CONDITIONAL(INTERNAL_YAML, test x$internal_yaml = xyes)
 
 # Checks for header files.
 AC_HEADER_STDC

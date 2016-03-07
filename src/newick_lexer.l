@@ -1,8 +1,11 @@
 %{
 #include <stdio.h>
-#include <igraph/igraph.h>
+
+#include "../igraph/include/igraph.h"
+
 #include "tree.h"
 #include "newick_parser.h"
+
 #pragma GCC diagnostic ignored "-Wswitch-default"
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wredundant-decls"

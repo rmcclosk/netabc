@@ -4,8 +4,9 @@
 #include <assert.h>
 #include <math.h>
 #include <Judy.h>
-#include <igraph/igraph.h>
 #include <gsl/gsl_randist.h>
+
+#include "../igraph/include/igraph.h"
 
 #include "simulate.h"
 #define NDEBUG

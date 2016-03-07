@@ -4,7 +4,9 @@
 #include <time.h>
 #include <math.h>
 #include <gsl/gsl_rng.h>
-#include <igraph/igraph.h>
+
+#include "../igraph/include/igraph.h"
+
 #include "util.h"
 
 #define LOG_ZERO DBL_MIN_10_EXP / 2

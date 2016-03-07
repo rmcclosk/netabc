@@ -3,9 +3,10 @@
 #include <math.h>
 #include <float.h>
 #include <limits.h>
-#include <igraph/igraph.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
+
+#include "../igraph/include/igraph.h"
 
 #include "simulate.h"
 #include "util.h"

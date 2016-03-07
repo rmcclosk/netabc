@@ -9,10 +9,11 @@
 #include <float.h>
 #include <string.h>
 #include <yaml.h>
-#include <igraph/igraph.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_statistics_double.h>
+
+#include "../igraph/include/igraph.h"
 
 #include "tree.h"
 #include "treestats.h"

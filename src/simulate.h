@@ -6,8 +6,9 @@
 #ifndef SIMULATE_H
 #define SIMULATE_H
 
-#include <igraph/igraph.h>
 #include <gsl/gsl_rng.h>
+
+#include "../igraph/include/igraph.h"
 
 /** Simulate a phylogenetic tree from a contact network.
  *
