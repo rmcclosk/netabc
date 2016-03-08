@@ -48,19 +48,19 @@ with priors is described in the following section.
 
 ### Command line options
 
-** -t, --num-threads **
+**-t, --num-threads**
 
 Number of threads to use. Ideally you would set this to the number of cores you
 have available. The default is one thread, but we strongly encourage you to use
 multiple threads if possible.
 
-** -s, --seed **
+**-s, --seed**
 
 An integer to use to set the state of the random number generator. Repeated
 runs with the same tree and seed should produce the same results. The default
 is to use the current time.
 
-** -l, --decay-factor **
+**-l, --decay-factor**
 
 The decay factor parameter to the tree kernel (see [@poon2013mapping]). The
 default is 0.3, and typical values are between 0.2 and 0.5. We encourage you to
@@ -68,33 +68,33 @@ perform a preliminary analysis to find optimal kernel meta-parameters for your
 particular model, such as the cross-validation analysis performed in
 [@poon2015phylodynamic].
 
-** -g, --rbf-variance **
+**-g, --rbf-variance**
 
 The variance for the radial basis function used in the tree kernel (see
 [@poon2013mapping]). The default is 4, and typical values are between 0.5 and
 8. As with the decay factor parameter, we encourage you to perform a separate
 analysis to find an optimal value for your problem.
 
-** -c, --nltt **
+**-c, --nltt**
 
 If this option is passed, multiply the tree kernel by the normalized
 lineages-through-time (nLTT) statistic [@janzen2015approximate]. This is not
 done by default.
 
-** -n, --num-particles **
+**-n, --num-particles**
 
 The number of particles to use for SMC (see [@del2012adaptive]). More particles
 lead to a better SMC approximation, but at the expense of a linear increase in
 computational cost. The default is 1000, which was used by [@del2012adaptive]
 but leads to a fairly course approximation.
 
-** -p, --num-samples **
+**-p, --num-samples**
 
 The number of simulated trees to keep track of per particle. Again, more is
 better in terms of accuracy, but the complexity is linearly related. The
 default is 5; typical values are between 1 and 100.
 
-** -q, --quality **
+**-q, --quality**
 
 The coefficient of the equation which is solved to determine the next tolerance
 value _ε_. It is called _α_ in [@del2012adaptive]. Essentially it represents a
@@ -102,26 +102,26 @@ tradeoff between speed and accuracy - lower values will finish with fewer
 iterations but produce worse approximations. Typical values are between 0.9 and
 0.99. The default is 0.95.
 
-** -d, --trace **
+**-d, --trace**
 
 Dump the values of each particle, their weights, and the distances of their
 associated simulated trees to this file after each iteration. You *must*
 specify this parameter if you want to record the estimated parameter values.
 
-** -m, --net-type **
+**-m, --net-type**
 
 The name of the network model you want to fit. Currently available values are
 listed in the next section. The default is "pa", which indicates
 Barabasi-Albert preferential attachment.
 
-** -e, --final-epsilon **
+**-e, --final-epsilon**
 
 The first of two possible stopping conditions for SMC. The algorithm will be
 stopped when the current distance tolerance falls to less than this value. The
 default is 0.01. If you do not want to use this stopping criterion, pass `-e 0`
 and specify a value for `-a`.
 
-** -a, --final-accept-rate **
+**-a, --final-accept-rate**
 
 The second of two possible stopping conditions for SMC. The algorithm will be
 stopped when the acceptance proportion of MCMC moves of the particles falls below
