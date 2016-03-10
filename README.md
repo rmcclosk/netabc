@@ -14,10 +14,10 @@ You need the following shared libraries.
 
 On Ubuntu, these are all available in the repos.
 
-   sudo apt-get install libgsl0ldbl libgsl0-dev 
-   sudo apt-get install libjudydebian1 libjudy-dev 
-   sudo apt-get install libyaml-0-2 libyaml-dev
-   sudo apt-get install check
+    sudo apt-get install libgsl0ldbl libgsl0-dev 
+    sudo apt-get install libjudydebian1 libjudy-dev 
+    sudo apt-get install libyaml-0-2 libyaml-dev
+    sudo apt-get install check
 
 Optionally, to build the documentation, you need
 [Doxygen](http://www.stack.nl/~dimitri/doxygen/index.html) and a LaTeX

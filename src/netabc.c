@@ -479,11 +479,13 @@ void sample_dataset(gsl_rng *rng, const double *theta, const void *arg, void *X)
             break;
         case NET_TYPE_GNP:
             igraph_erdos_renyi_game(&net, IGRAPH_ERDOS_RENYI_GNP, (int)
-                    theta[UNIVERSAL_N], theta[GNP_P], 0, 0);
+                    theta[UNIVERSAL_N], theta[GNP_P], 0, 0,
+                    &igraph_rng);
             break;
         case NET_TYPE_SMALLWORLD:
             igraph_watts_strogatz_game(&net, 1, (int) theta[UNIVERSAL_N], 
-                    (int) theta[SMALLWORLD_NEI], theta[SMALLWORLD_P], 0, 0);
+                    (int) theta[SMALLWORLD_NEI], theta[SMALLWORLD_P], 0, 0,
+                    &igraph_rng);
             break;
         default:
             fprintf(stderr, "BUG: unknown network type %d\n", karg->type);
