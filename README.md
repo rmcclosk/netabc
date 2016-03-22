@@ -29,9 +29,11 @@ If you just want to use the program, download one of the releases. The usual
 procedure (./configure && make && make install) should work.
 
 If you want to build straight from the git repo, for example if you are
-interested in adding new network models, you need to run ./autogen.sh first to
-create configure, then follow the same build procedure. This requires recent
-versions of the autotools, flex, and bison.
+interested in adding new network models, first clone the repository using
+`git clone --recursive`. You must use `--recursive` because a forked version of
+the igraph library has been packaged as a submodule. Then run `./autogen.sh` to
+create the configure script, and build as usual. This requires recent versions
+of the autotools, flex, and bison.
 
 ## Use
 
@@ -218,3 +220,21 @@ beta | shift,  _α_ (first shape), _β_ (second shape), scale
 logistic |  _μ_ (location), _s_ (scale)
 pareto | _x<sub>m</sub>_ (scale), _α_ (shape)
 weibull | shift, _λ_ (scale), _k_ (shape)
+
+## Adding new models
+
+To maintain the speed of the program, it is necessary to directly modify the C
+code if you want to add a new network model. All the model-specific code is in
+`src/netabc.c`. At this stage, the procedure to add a new model is somewhat
+involved.
+
+1. Add a new element to the `net_type` enum for your new model.
+2. Append the number of model parameters it has to the global `NUM_PARAMS`
+   array.
+3. Add elements to the `net_parameter` enum for all the model's parameters.
+4. Add the parameters' names to the `PARAM_NAMES` array.
+5. Modify the `get_options()` function to accept an abbreviation for your
+   network type on the command line. Look for the line `opts.net = NET_TYPE_PA`
+   and add something similar. Add the abbreviation to the `usage()` function.
+6. Add code to simulate a network under your model in the `sample_dataset()`
+   function. Look for the line `case NET_TYPE_PA:` and add something similar.

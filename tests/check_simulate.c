@@ -1,8 +1,8 @@
 #include <check.h>
 #include <limits.h>
-#include <igraph/igraph.h>
 #include <gsl/gsl_rng.h>
 
+#include "../igraph/include/igraph.h"
 #include "../src/tree.h"
 #include "../src/util.h"
 #include "../src/simulate.h"
