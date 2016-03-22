@@ -48,6 +48,13 @@ You can type `netabc -h` to get a summary of all the command line options. They
 are described in detail in the next section. The structure of the YAML file
 with priors is described in the following section.
 
+Three additional binaries are included with `netabc`. The first is
+`treekernel`, which computes the phylogenetic kernel of a pair of trees. The
+second is `nettree`, which simulates a phylogeny over a transmission tree in
+[GML](https://en.wikipedia.org/wiki/Graph_Modelling_Language) format. The third
+is `treestat`, which computes several summary statistics on trees. Each of
+these has a `--help` option which displays their usage.
+
 ### Command line options
 
 **-t, --num-threads**
