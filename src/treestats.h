@@ -151,4 +151,14 @@ double avg_unbalance(const igraph_t *tree);
  */
 double pybus_gamma(const igraph_t *tree);
 
+/** Compute the ratio of internal to terminal branch lengths.
+ *
+ * This is the ratio of the average internal branch length to the average
+ * terminal branch length.
+ *
+ * \param[in] tree tree to compute the ratio for
+ * \return ratio of internal to terminal branch lengths
+ */
+double internal_terminal_ratio(const igraph_t *tree);
+
 #endif

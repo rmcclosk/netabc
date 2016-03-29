@@ -194,6 +194,15 @@ START_TEST(test_gamma)
 }
 END_TEST
 
+START_TEST(test_internal_terminal_ratio)
+{
+    igraph_t *t = tree_from_newick("(((t4:0.29,(t6:0.03,t1:0.03):0.26):0.01,(t3:0.29,t5:0.29):0.02):0.51,((t8:0.19,t2:0.19):0.13,t7:0.32):0.5);");
+    fprintf(stderr, "%f\n", internal_terminal_ratio(t));
+    ck_assert(fabs(internal_terminal_ratio(t) - 1.169734) < 1e-5);
+    igraph_destroy(t);
+}
+END_TEST
+
 Suite *tree_suite(void)
 {
     Suite *s;
@@ -221,6 +230,7 @@ Suite *tree_suite(void)
     tcase_add_test(tc_core, test_unbalanced);
     tcase_add_test(tc_core, test_avg_unbalance);
     tcase_add_test(tc_core, test_gamma);
+    tcase_add_test(tc_core, test_internal_terminal_ratio);
     suite_add_tcase(s, tc_core);
 
     return s;

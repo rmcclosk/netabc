@@ -397,6 +397,31 @@ double pybus_gamma(const igraph_t *tree)
     return gamma;
 }
 
+double internal_terminal_ratio(const igraph_t *tree)
+{
+    int i, from, to;
+    int ntip = (igraph_vcount(tree) + 1) / 2;
+    double internal = 0, terminal = 0;
+    igraph_vector_t degree;
+
+    igraph_vector_init(&degree, 0);
+    igraph_degree(tree, &degree, igraph_vss_all(), IGRAPH_OUT, 0);
+
+    for (i = 0; i < igraph_ecount(tree); ++i) {
+        igraph_edge(tree, i, &from, &to);
+        if (VECTOR(degree)[to] == 0) {
+            terminal += EAN(tree, "length", i);
+        }
+        else {
+            internal += EAN(tree, "length", i);
+        }
+    }
+    internal /= ntip - 2;
+    terminal /= ntip;
+    igraph_vector_destroy(&degree);
+    return internal / terminal;
+}
+
 /* Private. */
 
 /* recursively compute the ladder length */
