@@ -20,7 +20,8 @@ typedef enum {
     TREESTAT_CHERRIES,
     TREESTAT_PROP_UNBALANCED,
     TREESTAT_AVG_UNBALANCE,
-    TREESTAT_GAMMA
+    TREESTAT_GAMMA,
+    TREESTAT_INTERNAL_TERMINAL_RATIO
 } tree_statistic;
 
 struct treestat_options {
@@ -73,6 +74,7 @@ void usage(void)
     fprintf(stderr, "  prop-unbalanced           proportion of unbalanced subtrees\n");
     fprintf(stderr, "  unbalance                 average unbalance\n");
     fprintf(stderr, "  gamma                     Pybus & Harvey's gamma statistic\n");
+    fprintf(stderr, "  int-tip-ratio             ratio of internal to tip branch lengths\n");
 }
 
 struct treestat_options get_options(int argc, char **argv)
@@ -143,6 +145,9 @@ struct treestat_options get_options(int argc, char **argv)
                 }
                 else if (strcmp(optarg, "gamma") == 0) {
                     opts.stat = TREESTAT_GAMMA;
+                }
+                else if (strcmp(optarg, "int-tip-ratio") == 0) {
+                    opts.stat = TREESTAT_INTERNAL_TERMINAL_RATIO;
                 }
                 else {
                     fprintf(stderr, "Unrecognized tree statistic \"%s\"\n", optarg);
@@ -281,6 +286,9 @@ int main (int argc, char **argv)
             break;
         case TREESTAT_GAMMA:
             s = pybus_gamma(t);
+            break;
+        case TREESTAT_INTERNAL_TERMINAL_RATIO:
+            s = internal_terminal_ratio(t);
             break;
         default:
             fprintf(stderr, "Unrecognized tree statistic\n");
