@@ -260,7 +260,7 @@ struct prior_data *read_priors(FILE *f, net_type net)
     }
 
     if (f == NULL) {
-        return;
+        return NULL;
     }
 
     yaml_parser_initialize(&parser);
