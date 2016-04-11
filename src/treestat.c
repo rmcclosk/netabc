@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <math.h>
+#include <string.h>
 
 #include "tree.h"
 #include "treestats.h"
