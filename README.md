@@ -10,7 +10,12 @@ You need the following shared libraries.
 * [GSL](http://www.gnu.org/software/gsl/)
 * [Judy](http://judy.sourceforge.net/)
 * [libyaml](http://pyyaml.org/wiki/LibYAML)
-* [check](http://check.sourceforge.net/) (optional, for running tests)
+* [check](http://check.sourceforge.net/)
+
+And recent versions the following programs.
+
+* [flex](http://flex.sourceforge.net/)
+* [bison](https://www.gnu.org/software/bison/)
 
 On Ubuntu, these are all available in the repos.
 
@@ -18,6 +23,7 @@ On Ubuntu, these are all available in the repos.
     sudo apt-get install libjudydebian1 libjudy-dev 
     sudo apt-get install libyaml-0-2 libyaml-dev
     sudo apt-get install check
+    sudo apt-get install flex bison
 
 Optionally, to build the documentation, you need
 [Doxygen](http://www.stack.nl/~dimitri/doxygen/index.html) and a LaTeX
@@ -25,15 +31,22 @@ distribution like TeX Live.
 
 ## Installation
 
-If you just want to use the program, download one of the releases. The usual
-procedure (./configure && make && make install) should work.
+If you just want to use the program, download one of the releases. Check the
+INSTALL file inside the release for instructions.
 
 If you want to build straight from the git repo, for example if you are
 interested in adding new network models, first clone the repository using
 `git clone --recursive`. You must use `--recursive` because a forked version of
 the igraph library has been packaged as a submodule. Then run `./autogen.sh` to
-create the configure script, and build as usual. This requires recent versions
-of the autotools, flex, and bison.
+create the configure script, and build with the `--enable-tls` option (this is
+necessary for igraph).
+
+    ./configure --enable-tls
+    make
+    make install
+
+This requires recent versions of the
+[autotools](http://www.gnu.org/software/autoconf/autoconf.html#family).
 
 ## Use
 
