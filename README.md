@@ -208,7 +208,9 @@ exact values for time or _I_ unless the other is zero.
 These are the distributions currently supported for specifying priors.
 Currently, joint priors are not supported, so you must list priors for each
 parameter independently. The "delta" distribution is the Dirac delta,
-equivalent to specifying an exact value.
+equivalent to specifying an exact value. All distributions are continuous
+except "poisson" and "discrete_uniform", which are for discrete-valued
+parameters.
 
 Some distributions, such as the exponential distribution, are lower-bounded by
 zero. The parameter called "shift" allows you to specify a different lower
@@ -240,6 +242,8 @@ beta | shift,  _α_ (first shape), _β_ (second shape), scale
 logistic |  _μ_ (location), _s_ (scale)
 pareto | _x<sub>m</sub>_ (scale), _α_ (shape)
 weibull | shift, _λ_ (scale), _k_ (shape)
+poisson | shift, _λ_ (variance)
+discrete_uniform | _a_ (lower limit, inclusive), _b_ (upper limit, inclusive)
 
 ## Adding new models
 
@@ -253,8 +257,10 @@ involved.
    array.
 3. Add elements to the `net_parameter` enum for all the model's parameters.
 4. Add the parameters' names to the `PARAM_NAMES` array.
-5. Modify the `get_options()` function to accept an abbreviation for your
+5. Indicate whether the parameters are continuous or discrete in the
+   `PARAM_DISCRETE` array.
+6. Modify the `get_options()` function to accept an abbreviation for your
    network type on the command line. Look for the line `opts.net = NET_TYPE_PA`
    and add something similar. Add the abbreviation to the `usage()` function.
-6. Add code to simulate a network under your model in the `sample_dataset()`
+7. Add code to simulate a network under your model in the `sample_dataset()`
    function. Look for the line `case NET_TYPE_PA:` and add something similar.
