@@ -82,6 +82,12 @@ void sample_distribution(int n, double *theta, gsl_rng *rng,
             case WEIBULL:
                 theta[i] += gsl_ran_weibull(rng, params[i][1], params[i][2]);
                 break;
+            case POISSON:
+                theta[i] += gsl_ran_poisson(rng, params[i][1]);
+                break;
+            case DISCRETE_UNIFORM:
+                theta[i] += floor(gsl_ran_flat(rng, 0, params[i][1] + 1 - params[i][0]));
+                break;
             default:
                 fprintf(stderr, "BUG: tried to sample from unknown distribution\n");
                 theta[i] = 0;
@@ -151,6 +157,12 @@ double density_distribution(int n, const double *theta,
             case WEIBULL:
                 dens *= gsl_ran_weibull_pdf(theta[i] - params[i][0], params[i][1], params[i][2]);
                 break;
+            case POISSON:
+                dens *= gsl_ran_poisson_pdf( (int) (theta[i] - params[i][0]), params[i][1] );
+                break;
+            case DISCRETE_UNIFORM:
+                dens *= gsl_ran_flat_pdf(theta[i], params[i][0], params[i][1]+1);
+                break;
             default:
                 fprintf(stderr, "BUG: tried to calculate density for unknown distribution\n");
                 break;
@@ -211,6 +223,12 @@ distribution parse_distribution(const char *s)
     }
     else if (strcmp(s, "weibull") == 0) {
         return WEIBULL;
+    }
+    else if (strcmp(s, "poisson") == 0) {
+        return POISSON;
+    }
+    else if (strcmp(s, "discrete_uniform") == 0) {
+        return DISCRETE_UNIFORM;
     }
     return 0;
 }

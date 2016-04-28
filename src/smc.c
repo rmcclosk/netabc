@@ -490,7 +490,7 @@ void *perturb(void *args)
         memcpy(cur_theta, prev_theta, nparam * sizeof(double));
 
         // perturb the particle
-        smc_work.functions->propose(rng, cur_theta, fdbk, smc_work.config->propose_arg);
+        smc_work.functions->propose(rng, cur_theta, smc_work.config->discrete, fdbk, smc_work.config->propose_arg);
 
         // prior ratio
         mh_ratio = smc_work.functions->prior_density(cur_theta, smc_work.config->prior_density_arg) /
@@ -501,9 +501,8 @@ void *perturb(void *args)
         }
 
         // proposal ratio
-        mh_ratio *= smc_work.functions->proposal_density(cur_theta, prev_theta, fdbk, smc_work.config->proposal_density_arg) /
-                    smc_work.functions->proposal_density(prev_theta, cur_theta, fdbk, smc_work.config->proposal_density_arg);
-
+        mh_ratio *= smc_work.functions->proposal_density(cur_theta, prev_theta, smc_work.config->discrete, fdbk, smc_work.config->proposal_density_arg) /
+                    smc_work.functions->proposal_density(prev_theta, cur_theta, smc_work.config->discrete, fdbk, smc_work.config->proposal_density_arg);
         if (mh_ratio == 0) {
             continue;
         }

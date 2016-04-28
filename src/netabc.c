@@ -66,12 +66,22 @@ typedef enum {
 
 /**
  * Names for the network parameters. Must be kept in sync with the
- * net_parameter and net_type enums.
+ * net_parameter and net_type enums and the PARAM_DISCRETE array.
  */
 static char *PARAM_NAMES[3][7] = {
     {"N", "I", "time", "transmit_rate", "remove_rate", "m", "alpha"},
     {"N", "I", "time", "transmit_rate", "remove_rate", "p"},
     {"N", "I", "time", "transmit_rate", "remove_rate", "nei", "p"}
+};
+
+/**
+ * Whether the parameters are discrete or continuous valued. Must be kept in
+ * sync with the net_parameter, net_type, and PARAM_NAMES arrays.
+ */
+static int PARAM_DISCRETE[3][7] = {
+    {0, 0, 0, 0, 0, 1, 0},
+    {0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 1, 0}
 };
 
 static const char ZEROES[BUFSIZ] = {0};
@@ -338,6 +348,8 @@ struct prior_data *read_priors(FILE *f, net_type net)
                             case STUDENT_T:
                             case LOGISTIC:
                             case PARETO:
+                            case POISSON:
+                            case DISCRETE_UNIFORM:
                                 pdata->params[param] = malloc(2 * sizeof(double));
                                 break;
                             case F:
@@ -404,6 +416,9 @@ void print_priors(struct prior_data *pdata, net_type net)
             case DELTA:
                 fprintf(stderr, "Delta(%.1f)\n", pdata->params[i][0]);
                 break;
+            case DISCRETE_UNIFORM:
+                fprintf(stderr, "DiscreteUniform(%d, %d)\n", (int) pdata->params[i][0], (int) pdata->params[i][1]);
+                break;
             default:
                 fprintf(stderr, "ERROR: unknown distribution type %d\n", pdata->dist[i]);
                 exit(EXIT_FAILURE);
@@ -423,30 +438,41 @@ struct kernel_data {
     net_type type;
 };
 
-void propose(gsl_rng *rng, double *theta, const void *feedback, const void *arg)
+void propose(gsl_rng *rng, double *theta, const int *discrete, const void *feedback, const void *arg)
 {
     int i;
     double *var = (double *) feedback;
     int nparam = * ((int *) arg);
     for (i = 0; i < nparam; ++i) {
-        theta[i] += gsl_ran_gaussian(rng, sqrt(2*var[i]));
+        if (discrete[i]) {
+            if (gsl_ran_flat(rng, 0, 1) < 0.5) {
+                theta[i] += gsl_ran_poisson(rng, sqrt(2*var[i]));
+            }
+            else {
+                theta[i] -= gsl_ran_poisson(rng, sqrt(2*var[i]));
+            }
+        }
+        else {
+            theta[i] += gsl_ran_gaussian(rng, sqrt(2*var[i]));
+        }
     }
 }
 
-double proposal_density(const double *from, const double *to, const void *feedback, const void *arg)
+double proposal_density(const double *from, const double *to, const int *discrete, const void *feedback, const void *arg)
 {
     int i;
     double *var = (double *) feedback;
     int nparam = * ((int *) arg);
     double p = 1;
 
-    if (to[UNIVERSAL_I] > to[UNIVERSAL_N]) {
-        return 0;
-    }
-
     for (i = 0; i < nparam; ++i) {
         if (fabs(var[i]) > FLT_EPSILON || fabs(to[i] - from[i]) > FLT_EPSILON) {
-            p *= gsl_ran_gaussian_pdf(to[i] - from[i], sqrt(2*var[i]));
+            if (discrete[i]) {
+                p *= gsl_ran_poisson_pdf((int) fabs(to[i] - from[i]), sqrt(2*var[i])) / 2;
+            }
+            else {
+                p *= gsl_ran_gaussian_pdf(to[i] - from[i], sqrt(2*var[i]));
+            }
         }
     }
     return p;
@@ -591,6 +617,7 @@ void sample_from_prior(gsl_rng *rng, double *theta, const void *arg)
 double prior_density(double *theta, const void *arg)
 {
     struct prior_data *parg = (struct prior_data *) arg;
+    // don't allow I > N
     if (theta[UNIVERSAL_N] < theta[UNIVERSAL_I]) {
         return 0;
     }
@@ -663,6 +690,7 @@ int main (int argc, char **argv)
     config.final_epsilon = opts.final_epsilon;
     config.final_accept_rate = opts.final_accept_rate;
     config.nparam = NUM_PARAMS[opts.net];
+    config.discrete = PARAM_DISCRETE[opts.net];
     config.feedback_size = config.nparam * sizeof(double);
 
     // fill and attach arguments for the user-supplied functions

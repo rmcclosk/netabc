@@ -8,6 +8,7 @@
 
 typedef struct {
     int nparam; /**< number of parameters in the model */
+    int *discrete; /**< whether parameters are discrete or continuous */
     int nparticle; /**< number of particles used to approximate the posterior */
     int nsample; /**< number of sampled data points per particle */
     int ess_tolerance; /**< ESS below this value triggers resampling */
@@ -30,8 +31,8 @@ typedef struct {
 } smc_config;
 
 typedef struct {
-    void   (*propose)           (gsl_rng *rng, double *, const void *, const void *);
-    double (*proposal_density)  (const double *, const double *, const void *, const void *);
+    void   (*propose)           (gsl_rng *rng, double *, const int *, const void *, const void *);
+    double (*proposal_density)  (const double *, const double *, const int *, const void *, const void *);
     void   (*sample_dataset)    (gsl_rng *rng, const double *, const void *, void *);
     double (*distance)          (const void *, const void *, const void *);
     void   (*feedback)          (const double *, int, void *, const void *);

@@ -26,7 +26,9 @@ typedef enum {
     BETA = 14,
     LOGISTIC = 15,
     PARETO = 16,
-    WEIBULL = 17
+    WEIBULL = 17,
+    POISSON = 18,
+    DISCRETE_UNIFORM = 19
 } distribution;
 
 /** Calculate a likelihood ratio test.
