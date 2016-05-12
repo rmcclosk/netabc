@@ -53,5 +53,5 @@ AC_FUNC_MALLOC
 
 # Output files
 AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile c-cmaes/Makefile])
 AC_OUTPUT
