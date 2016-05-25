@@ -11,13 +11,13 @@
 #include "../src/smc.h"
 #include "../src/util.h"
 
-void toy_propose(gsl_rng *rng, double *theta, const void *feedback, const void *arg)
+void toy_propose(gsl_rng *rng, double *theta, const int *discrete, const void *feedback, const void *arg)
 {
     double var = *((double *) feedback);
     *theta += gsl_ran_gaussian(rng, sqrt(2*var));
 }
 
-double toy_proposal_density(const double *from, const double *to, const void *feedback, const void *arg)
+double toy_proposal_density(const double *from, const double *to, const int *discrete, const void *feedback, const void *arg)
 {
     double var = * ((double *) feedback);
     return gsl_ran_gaussian_pdf(*to - *from, sqrt(2*var));
@@ -72,6 +72,67 @@ smc_functions toy_functions = {
     .prior_density = toy_prior_density
 };
 
+void bimodal_propose(gsl_rng *rng, double *theta, const int *discrete, const void *feedback, const void *arg)
+{
+    double var = *((double *) feedback);
+    *theta += gsl_ran_gaussian(rng, sqrt(2*var));
+}
+
+double bimodal_proposal_density(const double *from, const double *to, const int *discrete, const void *feedback, const void *arg)
+{
+    double var = * ((double *) feedback);
+    return gsl_ran_gaussian_pdf(*to - *from, sqrt(2*var));
+}
+
+void bimodal_sample_dataset(gsl_rng *rng, const double *theta, const void *data, void *X)
+{
+    double x;
+    if (rand() % 2) {
+        x = (*theta - 4 + gsl_ran_gaussian(rng, 1)); 
+    }
+    else {
+        x = (*theta + 4 + gsl_ran_gaussian(rng, 1));
+    }
+    memcpy(X, &x, sizeof(double));
+}
+
+double bimodal_distance(const void *x, const void *y, const void *arg)
+{
+    return fabs(*(double *) x - *(double *) y);
+}
+
+void bimodal_feedback(const double *theta, int nparticle, void *feedback, const void *arg)
+{
+    double var = gsl_stats_variance(theta, 1, nparticle);
+    memcpy(feedback, &var, sizeof(double));
+}
+
+void bimodal_destroy_dataset(void *z)
+{
+    return;
+}
+
+void bimodal_sample_from_prior(gsl_rng *rng, double *theta, const void *arg)
+{
+    *theta = gsl_ran_flat(rng, -10, 10);
+}
+
+double bimodal_prior_density(double *theta, const void *arg)
+{
+    gsl_ran_flat_pdf(*theta, -10, 10);
+}
+
+smc_functions bimodal_functions = {
+    .propose = bimodal_propose,
+    .proposal_density = bimodal_proposal_density,
+    .sample_dataset = bimodal_sample_dataset,
+    .distance = bimodal_distance,
+    .feedback = bimodal_feedback,
+    .destroy_dataset = bimodal_destroy_dataset,
+    .sample_from_prior = bimodal_sample_from_prior,
+    .prior_density = bimodal_prior_density
+};
+
 void write_tsv(char **hdr, double **data, int nrow, int ncol, const char *fn)
 {
     int i, j;
@@ -100,9 +161,11 @@ START_TEST (test_smc_toy)
     char *hdr[2] = {"theta", ""};
     double *data[2];
     FILE *trace = fopen("check_smc_trace.tsv", "w");
+    int discrete = 0;
 
     smc_config config = {
         .nparam = 1,
+        .discrete = &discrete,
         .nparticle = 10000,
         .nsample = 1,
         .ess_tolerance = 5000,
@@ -135,6 +198,48 @@ START_TEST (test_smc_toy)
 }
 END_TEST
 
+START_TEST (test_smc_bimodal)
+{
+    double y;
+    int i;
+    char *hdr[2] = {"theta", ""};
+    double *data[2];
+    FILE *trace = fopen("check_smc_bimodal_trace.tsv", "w");
+    int discrete = 0;
+
+    smc_config config = {
+        .nparam = 1,
+        .discrete = &discrete,
+        .nparticle = 10000,
+        .nsample = 1,
+        .ess_tolerance = 5000,
+        .final_epsilon = 0.01,
+        .quality = 0.95,
+        .step_tolerance = 1e-9,
+        .dataset_size = sizeof(double),
+        .feedback_size = sizeof(double)
+    };
+
+    fprintf(trace, "iter\tweight\ttheta\tX0\n");
+    smc_result *res = abc_smc(config, bimodal_functions, 0, 1, (void *) &y, trace);
+    fclose(trace);
+
+    for (i = 0; i < config.nparticle; ++i) {
+        ck_assert(res->theta[res->niter][i] > -10 && res->theta[res->niter][i] < 10);
+    }
+    data[0] = res->theta[res->niter];
+    write_tsv(hdr, data, config.nparticle, 1, "check_smc_bimodal_theta.tsv");
+
+    data[0] = &res->epsilon[1];
+    data[1] = &res->acceptance_rate[1];
+    hdr[0] = "epsilon";
+    hdr[1] = "acceptance_rate";
+    write_tsv(hdr, data, res->niter-1, 2, "check_smc_bimodal_iter.tsv");
+
+    smc_result_free(res);
+}
+END_TEST
+
 Suite *smc_suite(void)
 {
     Suite *s;
@@ -143,6 +248,7 @@ Suite *smc_suite(void)
     s = suite_create("smc");
 
     tc_smc = tcase_create("Core");
+    tcase_add_test(tc_smc, test_smc_bimodal);
     tcase_add_test(tc_smc, test_smc_toy);
     tcase_set_timeout(tc_smc, 60);
     suite_add_tcase(s, tc_smc);
