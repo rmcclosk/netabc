@@ -17,7 +17,6 @@ struct mmpp_options {
     int trace;
     int nrates;
     int bg_states;
-    int trans_at_nodes;
     int use_tips;
     double lbound_branch;
     double ubound_branch;
@@ -37,7 +36,6 @@ struct option long_options[] =
     {"model-selector", required_argument, 0, 'm'},
     {"bg-states", required_argument, 0, 'l'},
     {"output", required_argument, 0, 'o'},
-    {"trans-at-nodes", no_argument, 0, 'n'},
     {"ignore-tips", no_argument, 0, 'i'},
     {"lbound-branch", required_argument, 0, '1'},
     {"ubound-branch", required_argument, 0, '2'},
@@ -111,7 +109,6 @@ struct mmpp_options get_options(int argc, char **argv)
         .trace = 0,
         .nrates = 0,
         .bg_states = 1,
-        .trans_at_nodes = 0,
         .use_tips = 1,
         .lbound_branch = 1e-10,
         .ubound_branch = 1e10,
@@ -122,7 +119,7 @@ struct mmpp_options get_options(int argc, char **argv)
 
     while (c != -1)
     {
-        c = getopt_long(argc, argv, "hs:b:c:itr:m:nl:o:1:2:3:4:", long_options, &i);
+        c = getopt_long(argc, argv, "hs:b:c:itr:m:l:o:1:2:3:4:", long_options, &i);
 
         switch (c)
         {
@@ -168,9 +165,6 @@ struct mmpp_options get_options(int argc, char **argv)
                 else if (strcmp(optarg, "bic") == 0) {
                     opts.ms = BIC;
                 }
-            case 'n':
-                opts.trans_at_nodes = 1;
-                break;
             case 'o':
                 opts.output = fopen(optarg, "w");
                 break;
@@ -220,7 +214,7 @@ int main (int argc, char **argv)
         bounds[i] /= branch_scale;
 
     error = fit_mmpp(tree, &opts.nrates, &theta, opts.trace, opts.cmaes_settings,
-            states, opts.ms, opts.use_tips, opts.trans_at_nodes, bounds);
+            states, opts.ms, opts.use_tips, bounds);
     display_results(opts.nrates, theta, branch_scale);
 
     clusters = malloc(igraph_vcount(tree) * sizeof(int));

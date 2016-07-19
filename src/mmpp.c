@@ -42,18 +42,17 @@ struct mmpp_workspace {
 
 int ckdiff(double t, const double y[], double f[], void *params);
 void calculate_P(const igraph_t *tree, int nrates, const double *theta, 
-        mmpp_workspace *w, int trans_at_nodes, int use_tips);
+        mmpp_workspace *w, int use_tips);
 void calculate_pi(const igraph_t *tree, int nrates, const double *theta, 
         mmpp_workspace *w);
-void mmpp_workspace_set_params(mmpp_workspace *w, const double *theta,
-        int trans_at_nodes);
+void mmpp_workspace_set_params(mmpp_workspace *w, const double *theta);
 int _fit_mmpp(const igraph_t *tree, int nrates, double *theta, int trace,
              const char *cmaes_settings, int *states, double *loglik,
-             int use_tips, int trans_at_nodes, double bounds[4]);
+             int use_tips, double bounds[4]);
 
 int fit_mmpp(const igraph_t *tree, int *nrates, double **theta, int trace,
              const char *cmaes_settings, int *states, model_selector sel,
-             int use_tips, int trans_at_nodes, double bounds[4])
+             int use_tips, double bounds[4])
 {
     int i, accept, error = 0;
     double loglik, prev_loglik, test_stat;
@@ -62,13 +61,13 @@ int fit_mmpp(const igraph_t *tree, int *nrates, double **theta, int trace,
     if (*nrates > 0)
     {
         error = _fit_mmpp(tree, *nrates, *theta, trace, cmaes_settings, states,
-                          &loglik, use_tips, trans_at_nodes, bounds);
+                          &loglik, use_tips, bounds);
         fprintf(stderr, "log likelihood for %d state model is %f\n", *nrates, loglik);
         return error;
     }
 
     error = _fit_mmpp(tree, 1, prev_theta, trace, cmaes_settings, states,
-                      &prev_loglik, use_tips, trans_at_nodes, bounds);
+                      &prev_loglik, use_tips, bounds);
     fprintf(stderr, "log likelihood for 1 state model is %f\n", prev_loglik);
     *nrates = 1;
 
@@ -78,7 +77,7 @@ int fit_mmpp(const igraph_t *tree, int *nrates, double **theta, int trace,
 
         // if we failed to fit a model with more states, fall back to the previous one
         if (_fit_mmpp(tree, i, *theta, trace, cmaes_settings, states, &loglik,
-                      use_tips, trans_at_nodes, bounds)) {
+                      use_tips, bounds)) {
             fprintf(stderr, "Warning: parameter estimates for %d state model did not converge\n", i);
         }
         fprintf(stderr, "log likelihood for %d state model is %f\n", i, loglik);
@@ -254,7 +253,7 @@ void guess_parameters(const igraph_t *tree, int nrates, double *theta)
 }
 
 double likelihood(const igraph_t *tree, int nrates, const double *theta,
-                  mmpp_workspace *w, int trans_at_nodes, int use_tips,
+                  mmpp_workspace *w, int use_tips,
                   int reconstruct)
 { 
     int i, j, rt = root(tree);
@@ -262,8 +261,8 @@ double likelihood(const igraph_t *tree, int nrates, const double *theta,
     int lchild, rchild, pstate, cstate, new_scale;
     igraph_vector_int_t *children;
 
-    mmpp_workspace_set_params(w, theta, trans_at_nodes);
-    calculate_P(tree, nrates, theta, w, trans_at_nodes, use_tips);
+    mmpp_workspace_set_params(w, theta);
+    calculate_P(tree, nrates, theta, w, use_tips);
 
     for (i = 0; i < igraph_vcount(tree); ++i)
     {
@@ -313,10 +312,10 @@ double likelihood(const igraph_t *tree, int nrates, const double *theta,
 }
 
 double reconstruct(const igraph_t *tree, int nrates, const double *theta,
-        mmpp_workspace *w, int *states, int use_tips, int trans_at_nodes)
+        mmpp_workspace *w, int *states, int use_tips)
 {
     int i, rt = root(tree), lchild, rchild;
-    double lik = likelihood(tree, nrates, theta, w, trans_at_nodes, use_tips, 1);
+    double lik = likelihood(tree, nrates, theta, w, use_tips, 1);
     igraph_vector_int_t *children;
 
     states[rt] = which_max(&w->L[rt * nrates], nrates);
@@ -337,7 +336,7 @@ double reconstruct(const igraph_t *tree, int nrates, const double *theta,
 /* Private. */
 int _fit_mmpp(const igraph_t *tree, int nrates, double *theta, int trace,
              const char *cmaes_settings, int *states, double *loglik, 
-             int use_tips, int trans_at_nodes, double bounds[4])
+             int use_tips, double bounds[4])
 {
     int i, j, dimension = nrates * nrates, error = 0, cur = nrates;
     int *state_order;
@@ -381,7 +380,7 @@ int _fit_mmpp(const igraph_t *tree, int nrates, double *theta, int trace,
                 if (trace)
                     fprintf(stderr, "%f\t", theta[j]);
             }
-            funvals[i] = -likelihood(tree, nrates, theta, w, trans_at_nodes, use_tips, 0);
+            funvals[i] = -likelihood(tree, nrates, theta, w, use_tips, 0);
             if (funvals[i] != funvals[i])
                 funvals[i] = FLT_MAX;
             if (trace)
@@ -415,9 +414,9 @@ int _fit_mmpp(const igraph_t *tree, int nrates, double *theta, int trace,
 	            theta[cur++] = tmp[nrates + state_order[i]*(nrates-1) + state_order[j]-1];
         }
     }
-    loglik[0] = likelihood(tree, nrates, theta, w, trans_at_nodes, 1, 0);
+    loglik[0] = likelihood(tree, nrates, theta, w, 1, 0);
     if (states != NULL)
-        reconstruct(tree, nrates, theta, w, states, 1, trans_at_nodes);
+        reconstruct(tree, nrates, theta, w, states, use_tips);
 
     cmaes_exit(&evo);
     cmaes_boundary_transformation_exit(&trbound);
@@ -430,8 +429,7 @@ int _fit_mmpp(const igraph_t *tree, int nrates, double *theta, int trace,
     return error;
 }
 
-void mmpp_workspace_set_params(mmpp_workspace *w, const double *theta, 
-        int trans_at_nodes)
+void mmpp_workspace_set_params(mmpp_workspace *w, const double *theta)
 {
     double rowsum = 0;
     int i, j, nrates = w->ckpar.nrates, cur = nrates;
@@ -448,16 +446,13 @@ void mmpp_workspace_set_params(mmpp_workspace *w, const double *theta,
                 rowsum += theta[cur++];
             }
         }
-        if (trans_at_nodes)
-            w->ckpar.Q[i * nrates + i] = -rowsum;
-        else
-            w->ckpar.Q[i * nrates + i] = -rowsum - theta[i];
+        w->ckpar.Q[i * nrates + i] = -rowsum - theta[i];
         w->y[i * nrates + i] = 1;
     }
 }
 
 void calculate_P(const igraph_t *tree, int nrates, const double *theta,
-        struct mmpp_workspace *w, int trans_at_nodes, int use_tips)
+        struct mmpp_workspace *w, int use_tips)
 {
     int i, j, k, from, to, cur = nrates; 
     double t = 0.0;
@@ -491,14 +486,12 @@ void calculate_P(const igraph_t *tree, int nrates, const double *theta,
         children = igraph_adjlist_get(&w->al, to);
         for (j = 0; j < nrates; ++j) {
             for (k = 0; k < nrates; ++k) {
-                if (igraph_vector_int_size(children) == 0 && !use_tips)
+                if (igraph_vector_int_size(children) == 0 && !use_tips) {
                     w->P[to * nrates * nrates + j * nrates + k] = (j == k);
-                else if (igraph_vector_int_size(children) > 0 && trans_at_nodes)
-                    w->P[to * nrates * nrates + j * nrates + k] *= theta[j] * exp(-theta[j] * t);
-                else if (igraph_vector_int_size(children) == 0 && trans_at_nodes)
-                    w->P[to * nrates * nrates + j * nrates + k] *= exp(-theta[j] * t);
-                else if (igraph_vector_int_size(children) > 0 && !trans_at_nodes)
+                }
+                if (igraph_vector_int_size(children) > 0) {
                     w->P[to * nrates * nrates + j * nrates + k] *= theta[k];
+                }
             }
         }
     }
