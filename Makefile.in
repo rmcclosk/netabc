@@ -110,12 +110,10 @@ host_triplet = @host@
 DIST_COMMON = $(srcdir)/aminclude.am $(srcdir)/Makefile.in \
 	$(srcdir)/Makefile.am $(top_srcdir)/configure \
 	$(am__configure_deps) $(srcdir)/config.h.in AUTHORS COPYING \
-	ar-lib build-aux/ar-lib compile build-aux/compile config.guess \
-	build-aux/config.guess config.sub build-aux/config.sub depcomp \
-	build-aux/depcomp install-sh build-aux/install-sh missing \
-	build-aux/missing ylwrap build-aux/ylwrap ltmain.sh \
-	build-aux/ltmain.sh $(top_srcdir)/build-aux/ar-lib \
-	$(top_srcdir)/build-aux/compile \
+	build-aux/ar-lib build-aux/compile build-aux/config.guess \
+	build-aux/config.sub build-aux/depcomp build-aux/install-sh \
+	build-aux/missing build-aux/ylwrap build-aux/ltmain.sh \
+	$(top_srcdir)/build-aux/ar-lib $(top_srcdir)/build-aux/compile \
 	$(top_srcdir)/build-aux/config.guess \
 	$(top_srcdir)/build-aux/config.sub \
 	$(top_srcdir)/build-aux/install-sh \
@@ -251,6 +249,10 @@ CHECK_CFLAGS = @CHECK_CFLAGS@
 CHECK_LIBS = @CHECK_LIBS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
+CXXDEPMODE = @CXXDEPMODE@
+CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
@@ -343,6 +345,7 @@ abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
 ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
+ac_ct_CXX = @ac_ct_CXX@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
@@ -419,7 +422,6 @@ SUBDIRS = igraph c-cmaes src . tests
 
 EXTRA_DIST = autogen.sh $(DX_CONFIG) doc
 MOSTLYCLEANFILES = $(DX_CLEANFILES)
-AM_LDFLAGS = -lstdc++
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 

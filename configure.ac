@@ -12,6 +12,7 @@ AM_INIT_AUTOMAKE([-Wall subdir-objects foreign 1.9.6])
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_CXX
 AC_PROG_INSTALL
 AM_PROG_AR
 AC_PROG_YACC
