@@ -11,13 +11,13 @@
 #include "../src/smc.h"
 #include "../src/util.h"
 
-void toy_propose(gsl_rng *rng, double *theta, const int *discrete, const void *feedback, const void *arg)
+void toy_propose(gsl_rng *rng, double *theta, const void *feedback, const void *arg)
 {
     double var = *((double *) feedback);
     *theta += gsl_ran_gaussian(rng, sqrt(2*var));
 }
 
-double toy_proposal_density(const double *from, const double *to, const int *discrete, const void *feedback, const void *arg)
+double toy_proposal_density(const double *from, const double *to, const void *feedback, const void *arg)
 {
     double var = * ((double *) feedback);
     return gsl_ran_gaussian_pdf(*to - *from, sqrt(2*var));
@@ -58,27 +58,16 @@ void toy_sample_from_prior(gsl_rng *rng, double *theta, const void *arg)
 
 double toy_prior_density(double *theta, const void *arg)
 {
-    gsl_ran_flat_pdf(*theta, -10, 10);
+    return gsl_ran_flat_pdf(*theta, -10, 10);
 }
 
-smc_functions toy_functions = {
-    .propose = toy_propose,
-    .proposal_density = toy_proposal_density,
-    .sample_dataset = toy_sample_dataset,
-    .distance = toy_distance,
-    .feedback = toy_feedback,
-    .destroy_dataset = toy_destroy_dataset,
-    .sample_from_prior = toy_sample_from_prior,
-    .prior_density = toy_prior_density
-};
-
-void bimodal_propose(gsl_rng *rng, double *theta, const int *discrete, const void *feedback, const void *arg)
+void bimodal_propose(gsl_rng *rng, double *theta, const void *feedback, const void *arg)
 {
     double var = *((double *) feedback);
     *theta += gsl_ran_gaussian(rng, sqrt(2*var));
 }
 
-double bimodal_proposal_density(const double *from, const double *to, const int *discrete, const void *feedback, const void *arg)
+double bimodal_proposal_density(const double *from, const double *to, const void *feedback, const void *arg)
 {
     double var = * ((double *) feedback);
     return gsl_ran_gaussian_pdf(*to - *from, sqrt(2*var));
@@ -122,17 +111,6 @@ double bimodal_prior_density(double *theta, const void *arg)
     gsl_ran_flat_pdf(*theta, -10, 10);
 }
 
-smc_functions bimodal_functions = {
-    .propose = bimodal_propose,
-    .proposal_density = bimodal_proposal_density,
-    .sample_dataset = bimodal_sample_dataset,
-    .distance = bimodal_distance,
-    .feedback = bimodal_feedback,
-    .destroy_dataset = bimodal_destroy_dataset,
-    .sample_from_prior = bimodal_sample_from_prior,
-    .prior_density = bimodal_prior_density
-};
-
 void write_tsv(char **hdr, double **data, int nrow, int ncol, const char *fn)
 {
     int i, j;
@@ -161,11 +139,9 @@ START_TEST (test_smc_toy)
     char *hdr[2] = {"theta", ""};
     double *data[2];
     FILE *trace = fopen("check_smc_trace.tsv", "w");
-    int discrete = 0;
 
     smc_config config = {
         .nparam = 1,
-        .discrete = &discrete,
         .nparticle = 10000,
         .nsample = 1,
         .ess_tolerance = 5000,
@@ -173,11 +149,20 @@ START_TEST (test_smc_toy)
         .quality = 0.95,
         .step_tolerance = 1e-9,
         .dataset_size = sizeof(double),
-        .feedback_size = sizeof(double)
+        .feedback_size = sizeof(double),
+
+        .propose = toy_propose,
+        .proposal_density = toy_proposal_density,
+        .sample_dataset = toy_sample_dataset,
+        .distance = toy_distance,
+        .feedback = toy_feedback,
+        .destroy_dataset = toy_destroy_dataset,
+        .sample_from_prior = toy_sample_from_prior,
+        .prior_density = toy_prior_density
     };
 
     fprintf(trace, "iter\tweight\ttheta\tX0\n");
-    smc_result *res = abc_smc(config, toy_functions, 0, 1, (void *) &y, trace);
+    smc_result *res = abc_smc(config, 0, 1, (void *) &y, trace);
     fclose(trace);
 
     for (i = 0; i < config.nparticle; ++i) {
@@ -205,11 +190,9 @@ START_TEST (test_smc_bimodal)
     char *hdr[2] = {"theta", ""};
     double *data[2];
     FILE *trace = fopen("check_smc_bimodal_trace.tsv", "w");
-    int discrete = 0;
 
     smc_config config = {
         .nparam = 1,
-        .discrete = &discrete,
         .nparticle = 10000,
         .nsample = 1,
         .ess_tolerance = 5000,
@@ -217,11 +200,20 @@ START_TEST (test_smc_bimodal)
         .quality = 0.95,
         .step_tolerance = 1e-9,
         .dataset_size = sizeof(double),
-        .feedback_size = sizeof(double)
+        .feedback_size = sizeof(double),
+
+        .propose = bimodal_propose,
+        .proposal_density = bimodal_proposal_density,
+        .sample_dataset = bimodal_sample_dataset,
+        .distance = bimodal_distance,
+        .feedback = bimodal_feedback,
+        .destroy_dataset = bimodal_destroy_dataset,
+        .sample_from_prior = bimodal_sample_from_prior,
+        .prior_density = bimodal_prior_density
     };
 
     fprintf(trace, "iter\tweight\ttheta\tX0\n");
-    smc_result *res = abc_smc(config, bimodal_functions, 0, 1, (void *) &y, trace);
+    smc_result *res = abc_smc(config, 0, 1, (void *) &y, trace);
     fclose(trace);
 
     for (i = 0; i < config.nparticle; ++i) {

@@ -20,8 +20,7 @@
  * global structure which is accessed by each thread.
  */
 typedef struct {
-    const smc_config *config;       /**< configuration parameters */
-    const smc_functions *functions; /**< user-supplied functions */
+    const smc_config *config;       /**< configuration parameters and functions */
 
     const void *data;               /**< input data */
     char *z;                        /**< simulated datasets */
@@ -70,8 +69,8 @@ void *perturb(void *args);
 
 // see Del Moral et al. 2012: An adaptive sequential Monte Carlo method for
 // approximate Bayesian computation
-smc_result *abc_smc(const smc_config config, const smc_functions functions,
-        int seed, int nthread, const void *data, FILE *trace_file)
+smc_result *abc_smc(const smc_config config, int seed, int nthread, 
+                    const void *data, FILE *trace_file)
 {
     // allocate space for the data in the workspace
     char *z = malloc(config.dataset_size * nthread);
@@ -106,7 +105,6 @@ smc_result *abc_smc(const smc_config config, const smc_functions functions,
 
     // set up the workspace
     smc_work.config = &config;
-    smc_work.functions = &functions;
     smc_work.data = data;
     smc_work.z = z;
     smc_work.fdbk = fdbk;
@@ -167,7 +165,7 @@ smc_result *abc_smc(const smc_config config, const smc_functions functions,
         }
 
         // step 3: perturb particles
-        functions.feedback(smc_work.theta, config.nparticle, fdbk, config.feedback_arg);
+        config.feedback(smc_work.theta, config.nparticle, fdbk, config.feedback_arg);
         smc_work.accept = 0;
         smc_work.alive = 0;
         for (i = 0; i < nthread; ++i) {
@@ -433,13 +431,13 @@ void *initialize(void *args)
     for (i = start; i < end; ++i)
     {
         particle = &smc_work.theta[i * nparam];
-        smc_work.functions->sample_from_prior(rng, particle, smc_work.config->sample_from_prior_arg);
+        smc_work.config->sample_from_prior(rng, particle, smc_work.config->sample_from_prior_arg);
         smc_work.W[i] = 1. / nparticle;
         for (j = 0; j < nsample; ++j)
         {
-            smc_work.functions->sample_dataset(rng, particle, smc_work.config->sample_dataset_arg, z);
-            smc_work.X[i * nsample + j] = smc_work.functions->distance(z, smc_work.data, smc_work.config->distance_arg);
-            smc_work.functions->destroy_dataset(z);
+            smc_work.config->sample_dataset(rng, particle, smc_work.config->sample_dataset_arg, z);
+            smc_work.X[i * nsample + j] = smc_work.config->distance(z, smc_work.data, smc_work.config->distance_arg);
+            smc_work.config->destroy_dataset(z);
         }
 
         pthread_mutex_lock(&smc_alive_mutex);
@@ -490,19 +488,19 @@ void *perturb(void *args)
         memcpy(cur_theta, prev_theta, nparam * sizeof(double));
 
         // perturb the particle
-        smc_work.functions->propose(rng, cur_theta, smc_work.config->discrete, fdbk, smc_work.config->propose_arg);
+        smc_work.config->propose(rng, cur_theta, fdbk, smc_work.config->propose_arg);
 
         // prior ratio
-        mh_ratio = smc_work.functions->prior_density(cur_theta, smc_work.config->prior_density_arg) /
-                   smc_work.functions->prior_density(prev_theta, smc_work.config->prior_density_arg);
+        mh_ratio = smc_work.config->prior_density(cur_theta, smc_work.config->prior_density_arg) /
+                   smc_work.config->prior_density(prev_theta, smc_work.config->prior_density_arg);
 
         if (mh_ratio == 0) {
             continue;
         }
 
         // proposal ratio
-        mh_ratio *= smc_work.functions->proposal_density(cur_theta, prev_theta, smc_work.config->discrete, fdbk, smc_work.config->proposal_density_arg) /
-                    smc_work.functions->proposal_density(prev_theta, cur_theta, smc_work.config->discrete, fdbk, smc_work.config->proposal_density_arg);
+        mh_ratio *= smc_work.config->proposal_density(cur_theta, prev_theta, fdbk, smc_work.config->proposal_density_arg) /
+                    smc_work.config->proposal_density(prev_theta, cur_theta, fdbk, smc_work.config->proposal_density_arg);
         if (mh_ratio == 0) {
             continue;
         }
@@ -510,9 +508,9 @@ void *perturb(void *args)
         // sample new datasets
         for (j = 0; j < nsample; ++j)
         {
-            smc_work.functions->sample_dataset(rng, cur_theta, smc_work.config->sample_dataset_arg, z);
-            new_X[j] = smc_work.functions->distance(z, smc_work.data, smc_work.config->distance_arg);
-            smc_work.functions->destroy_dataset(z);
+            smc_work.config->sample_dataset(rng, cur_theta, smc_work.config->sample_dataset_arg, z);
+            new_X[j] = smc_work.config->distance(z, smc_work.data, smc_work.config->distance_arg);
+            smc_work.config->destroy_dataset(z);
         }
 
         // SMC approximation to likelihood ratio

@@ -58,7 +58,6 @@ void usage(void)
     fprintf(stderr, "                            (lrt/aic/bic)\n");
     fprintf(stderr, "  -l, --bg-states           number of lowest states to use for background\n");
     fprintf(stderr, "  -o, --output              write clustering results and rates here\n");
-    fprintf(stderr, "  -n, --trans-at-nodes      assume transitions happen at nodes, not along edges\n");
     fprintf(stderr, "  -i, --ignore-tips         do not factor in terminal branches\n");
     fprintf(stderr, "  -1, --lbound-branch       lower bound for branching rates\n");
     fprintf(stderr, "  -2, --ubound-branch       upper bound for branching rates\n");

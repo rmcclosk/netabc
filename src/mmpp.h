@@ -6,7 +6,7 @@
 #ifndef MMPP_H
 #define MMPP_H
 
-#include "../igraph/include/igraph.h"
+#include "igraph/igraph.h"
 #include "stats.h"
 
 typedef struct mmpp_workspace mmpp_workspace;

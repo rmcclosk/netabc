@@ -102,7 +102,9 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am_check_simulate_OBJECTS = check_simulate-check_simulate.$(OBJEXT)
 check_simulate_OBJECTS = $(am_check_simulate_OBJECTS)
-check_simulate_DEPENDENCIES = $(top_builddir)/src/libnetabc.la
+am__DEPENDENCIES_1 =
+check_simulate_DEPENDENCIES = $(top_builddir)/src/libnetabc.la \
+	$(am__DEPENDENCIES_1)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -113,33 +115,38 @@ check_simulate_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$@
 am_check_smc_OBJECTS = check_smc-check_smc.$(OBJEXT)
 check_smc_OBJECTS = $(am_check_smc_OBJECTS)
-check_smc_DEPENDENCIES = $(top_builddir)/src/libnetabc.la
+check_smc_DEPENDENCIES = $(top_builddir)/src/libnetabc.la \
+	$(am__DEPENDENCIES_1)
 check_smc_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(check_smc_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 am_check_stats_OBJECTS = check_stats-check_stats.$(OBJEXT)
 check_stats_OBJECTS = $(am_check_stats_OBJECTS)
-check_stats_DEPENDENCIES = $(top_builddir)/src/libnetabc.la
+check_stats_DEPENDENCIES = $(top_builddir)/src/libnetabc.la \
+	$(am__DEPENDENCIES_1)
 check_stats_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(check_stats_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 am_check_tree_OBJECTS = check_tree-check_tree.$(OBJEXT)
 check_tree_OBJECTS = $(am_check_tree_OBJECTS)
-check_tree_DEPENDENCIES = $(top_builddir)/src/libnetabc.la
+check_tree_DEPENDENCIES = $(top_builddir)/src/libnetabc.la \
+	$(am__DEPENDENCIES_1)
 check_tree_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(check_tree_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 am_check_treestats_OBJECTS =  \
 	check_treestats-check_treestats.$(OBJEXT)
 check_treestats_OBJECTS = $(am_check_treestats_OBJECTS)
-check_treestats_DEPENDENCIES = $(top_builddir)/src/libnetabc.la
+check_treestats_DEPENDENCIES = $(top_builddir)/src/libnetabc.la \
+	$(am__DEPENDENCIES_1)
 check_treestats_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(check_treestats_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
 am_check_util_OBJECTS = check_util-check_util.$(OBJEXT)
 check_util_OBJECTS = $(am_check_util_OBJECTS)
-check_util_DEPENDENCIES = $(top_builddir)/src/libnetabc.la
+check_util_DEPENDENCIES = $(top_builddir)/src/libnetabc.la \
+	$(am__DEPENDENCIES_1)
 check_util_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(check_util_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
@@ -573,23 +580,23 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 check_util_SOURCES = check_util.c $(top_builddir)/src/util.h 
-check_util_CFLAGS = $(WARN_CFLAGS) @CHECK_CFLAGS@ -I$(top_builddir)/igraph/include
-check_util_LDADD = $(WARN_LDFLAGS) $(top_builddir)/src/libnetabc.la @CHECK_LIBS@
+check_util_CFLAGS = $(WARN_CFLAGS) @CHECK_CFLAGS@ -I$(top_builddir)/igraph/include $(GSL_CFLAGS)
+check_util_LDADD = $(WARN_LDFLAGS) $(top_builddir)/src/libnetabc.la @CHECK_LIBS@ $(GSL_LIBS)
 check_stats_SOURCES = check_stats.c $(top_builddir)/src/stats.h
-check_stats_CFLAGS = $(WARN_CFLAGS) @CHECK_CFLAGS@ -I$(top_builddir)/igraph/include
-check_stats_LDADD = $(WARN_LDFLAGS) $(top_builddir)/src/libnetabc.la @CHECK_LIBS@
+check_stats_CFLAGS = $(WARN_CFLAGS) @CHECK_CFLAGS@ -I$(top_builddir)/igraph/include $(GSL_CFLAGS)
+check_stats_LDADD = $(WARN_LDFLAGS) $(top_builddir)/src/libnetabc.la @CHECK_LIBS@ $(GSL_LIBS)
 check_smc_SOURCES = check_smc.c $(top_builddir)/src/smc.h
-check_smc_CFLAGS = $(WARN_CFLAGS) @CHECK_CFLAGS@ -I$(top_builddir)/igraph/include
-check_smc_LDADD = $(WARN_LDFLAGS) $(top_builddir)/src/libnetabc.la @CHECK_LIBS@
+check_smc_CFLAGS = $(WARN_CFLAGS) @CHECK_CFLAGS@ -I$(top_builddir)/igraph/include $(GSL_CFLAGS)
+check_smc_LDADD = $(WARN_LDFLAGS) $(top_builddir)/src/libnetabc.la @CHECK_LIBS@ $(GSL_LIBS)
 check_tree_SOURCES = check_tree.c $(top_builddir)/src/tree.h
-check_tree_CFLAGS = $(WARN_CFLAGS) @CHECK_CFLAGS@ -I$(top_builddir)/igraph/include
-check_tree_LDADD = $(WARN_LDFLAGS) $(top_builddir)/src/libnetabc.la @CHECK_LIBS@
+check_tree_CFLAGS = $(WARN_CFLAGS) @CHECK_CFLAGS@ -I$(top_builddir)/igraph/include $(GSL_CFLAGS)
+check_tree_LDADD = $(WARN_LDFLAGS) $(top_builddir)/src/libnetabc.la @CHECK_LIBS@ $(GSL_LIBS)
 check_simulate_SOURCES = check_simulate.c $(top_builddir)/src/simulate.h
-check_simulate_CFLAGS = $(WARN_CFLAGS) @CHECK_CFLAGS@ -I$(top_builddir)/igraph/include
-check_simulate_LDADD = $(WARN_LDFLAGS) $(top_builddir)/src/libnetabc.la @CHECK_LIBS@
+check_simulate_CFLAGS = $(WARN_CFLAGS) @CHECK_CFLAGS@ -I$(top_builddir)/igraph/include $(GSL_CFLAGS)
+check_simulate_LDADD = $(WARN_LDFLAGS) $(top_builddir)/src/libnetabc.la @CHECK_LIBS@ $(GSL_LIBS)
 check_treestats_SOURCES = check_treestats.c $(top_builddir)/src/treestats.h
-check_treestats_CFLAGS = $(WARN_CFLAGS) @CHECK_CFLAGS@ -I$(top_builddir)/igraph/include
-check_treestats_LDADD = $(WARN_LDFLAGS) $(top_builddir)/src/libnetabc.la @CHECK_LIBS@
+check_treestats_CFLAGS = $(WARN_CFLAGS) @CHECK_CFLAGS@ -I$(top_builddir)/igraph/include $(GSL_CFLAGS)
+check_treestats_LDADD = $(WARN_LDFLAGS) $(top_builddir)/src/libnetabc.la @CHECK_LIBS@ $(GSL_LIBS)
 all: all-am
 
 .SUFFIXES:

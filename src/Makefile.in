@@ -15,6 +15,7 @@
 @SET_MAKE@
 
 
+
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
 am__make_running_with_option = \
@@ -84,7 +85,8 @@ bin_PROGRAMS = nettree$(EXEEXT) treekernel$(EXEEXT) netabc$(EXEEXT) \
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	newick_parser.h newick_parser.c newick_lexer.c \
-	$(top_srcdir)/build-aux/depcomp $(top_srcdir)/build-aux/ylwrap
+	$(top_srcdir)/build-aux/depcomp $(top_srcdir)/build-aux/ylwrap \
+	$(include_HEADERS) $(pkginclude_HEADERS)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_gcc_func_attribute.m4 \
 	$(top_srcdir)/m4/ax_prog_doxygen.m4 \
@@ -98,11 +100,40 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-LTLIBRARIES = $(noinst_LTLIBRARIES)
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__uninstall_files_from_dir = { \
+  test -z "$$files" \
+    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
+    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+         $(am__cd) "$$dir" && rm -f $$files; }; \
+  }
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
+	"$(DESTDIR)$(includedir)" "$(DESTDIR)$(pkgincludedir)"
+LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
-libnetabc_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(top_builddir)/igraph/src/libigraph.la \
-	$(top_builddir)/c-cmaes/libcmaes.la
+libnetabc_la_DEPENDENCIES = $(top_builddir)/igraph/src/libigraph.la \
+	$(top_builddir)/c-cmaes/libcmaes.la $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am_libnetabc_la_OBJECTS = libnetabc_la-util.lo libnetabc_la-stats.lo \
 	libnetabc_la-smc.lo libnetabc_la-tree.lo \
 	libnetabc_la-treestats.lo libnetabc_la-simulate.lo \
@@ -116,17 +147,16 @@ am__v_lt_1 =
 libnetabc_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libnetabc_la_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_netabc_OBJECTS = netabc-netabc.$(OBJEXT)
 netabc_OBJECTS = $(am_netabc_OBJECTS)
-netabc_DEPENDENCIES = libnetabc.la
+netabc_DEPENDENCIES = libnetabc.la $(am__DEPENDENCIES_1)
 netabc_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(netabc_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 am_nettree_OBJECTS = nettree-nettree.$(OBJEXT)
 nettree_OBJECTS = $(am_nettree_OBJECTS)
-nettree_DEPENDENCIES = libnetabc.la
+nettree_DEPENDENCIES = libnetabc.la $(am__DEPENDENCIES_1)
 nettree_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(nettree_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
@@ -144,7 +174,7 @@ treekernel_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 treestat_SOURCES = treestat.c
 treestat_OBJECTS = treestat-treestat.$(OBJEXT)
-treestat_DEPENDENCIES = libnetabc.la
+treestat_DEPENDENCIES = libnetabc.la $(am__DEPENDENCIES_1)
 treestat_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(treestat_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
@@ -208,6 +238,7 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
+HEADERS = $(include_HEADERS) $(pkginclude_HEADERS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
@@ -390,22 +421,24 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_YFLAGS = -d
 BUILT_SOURCES = newick_parser.h
-noinst_LTLIBRARIES = libnetabc.la
+lib_LTLIBRARIES = libnetabc.la
 libnetabc_la_SOURCES = util.h util.c stats.c stats.h smc.c smc.h tree.h tree.c treestats.h treestats.c simulate.h simulate.c mmpp.h mmpp.c newick_parser.h newick_parser.y newick_lexer.l $(top_builddir)/igraph/include/igraph.h
-libnetabc_la_CFLAGS = $(PTHREAD_CFLAGS) $(GSL_CFLAGS) $(LIBR_CFLAGS) $(WARN_CFLAGS) -I$(top_builddir)/igraph/include -I$(top_srcdir)/igraph/include -I$(top_srcdir)/c-cmaes
-libnetabc_la_LIBADD = $(PTHREAD_LIBS) $(GSL_LIBS) $(LIBR_LIBS) $(WARN_LDFLAGS) $(top_builddir)/igraph/src/libigraph.la $(top_builddir)/c-cmaes/libcmaes.la -lm -lstdc++ -lgmp -lxml2
+libnetabc_la_CFLAGS = $(PTHREAD_CFLAGS) $(GSL_CFLAGS) $(WARN_CFLAGS) -I$(top_builddir)/igraph/include -I$(top_srcdir)/igraph/include -I$(top_srcdir)/c-cmaes
+libnetabc_la_LIBADD = $(WARN_LDFLAGS) $(top_builddir)/igraph/src/libigraph.la $(top_builddir)/c-cmaes/libcmaes.la $(PTHREAD_LIBS) $(GSL_LIBS) -lm -lstdc++ -lgmp -lxml2
+include_HEADERS = netabc.h
+pkginclude_HEADERS = smc.h util.h stats.h tree.h treestats.h simulate.h mmpp.h newick_parser.h
 netabc_SOURCES = netabc.c
-netabc_CFLAGS = $(WARN_CFLAGS) -I$(top_builddir)/igraph/include -I$(top_srcdir)/igraph/include
-netabc_LDADD = $(WARN_LDFLAGS) libnetabc.la
+netabc_CFLAGS = $(WARN_CFLAGS) -I$(top_builddir)/igraph/include -I$(top_srcdir)/igraph/include $(GSL_CFLAGS)
+netabc_LDADD = $(WARN_LDFLAGS) libnetabc.la $(GSL_LIBS)
 nettree_SOURCES = nettree.c 
-nettree_CFLAGS = $(WARN_CFLAGS) -I$(top_builddir)/igraph/include -I$(top_srcdir)/igraph/include
-nettree_LDADD = $(WARN_LDFLAGS) libnetabc.la
+nettree_CFLAGS = $(GSL_CFLAGS) $(WARN_CFLAGS) -I$(top_builddir)/igraph/include -I$(top_srcdir)/igraph/include
+nettree_LDADD = libnetabc.la $(GSL_LIBS) $(WARN_LDFLAGS)
 treekernel_sources = treekernel.c
 treekernel_CFLAGS = $(WARN_CFLAGS) -I$(top_builddir)/igraph/include -I$(top_srcdir)/igraph/include
 treekernel_LDADD = $(WARN_LDFLAGS) libnetabc.la
 treestat_sources = treestat.c
-treestat_CFLAGS = $(WARN_CFLAGS) -I$(top_builddir)/igraph/include -I$(top_srcdir)/igraph/include
-treestat_LDADD = $(WARN_LDFLAGS) libnetabc.la
+treestat_CFLAGS = $(WARN_CFLAGS) -I$(top_builddir)/igraph/include -I$(top_srcdir)/igraph/include $(GSL_CFLAGS)
+treestat_LDADD = $(WARN_LDFLAGS) libnetabc.la $(GSL_LIBS)
 pcbr_sources = pcbr.c
 pcbr_CFLAGS = $(WARN_CFLAGS) -I$(top_builddir)/igraph/include -I$(top_srcdir)/igraph/include -I$(top_srcdir)/c-cmaes
 pcbr_LDADD = $(WARN_LDFLAGS) libnetabc.la
@@ -445,9 +478,33 @@ $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
 
-clean-noinstLTLIBRARIES:
-	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
-	@list='$(noinst_LTLIBRARIES)'; \
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
+	list2=; for p in $$list; do \
+	  if test -f $$p; then \
+	    list2="$$list2 $$p"; \
+	  else :; fi; \
+	done; \
+	test -z "$$list2" || { \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(libdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(libdir)" || exit 1; \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(libdir)'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(libdir)"; \
+	}
+
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
+	for p in $$list; do \
+	  $(am__strip_dir) \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$f'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$f"; \
+	done
+
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; \
 	locs=`for p in $$list; do echo $$p; done | \
 	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
 	      sort -u`; \
@@ -460,7 +517,7 @@ newick_parser.h: newick_parser.c
 	@if test ! -f $@; then $(MAKE) $(AM_MAKEFLAGS) newick_parser.c; else :; fi
 
 libnetabc.la: $(libnetabc_la_OBJECTS) $(libnetabc_la_DEPENDENCIES) $(EXTRA_libnetabc_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libnetabc_la_LINK)  $(libnetabc_la_OBJECTS) $(libnetabc_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(libnetabc_la_LINK) -rpath $(libdir) $(libnetabc_la_OBJECTS) $(libnetabc_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
@@ -720,6 +777,48 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
+install-includeHEADERS: $(include_HEADERS)
+	@$(NORMAL_INSTALL)
+	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(includedir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(includedir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(includedir)'"; \
+	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(includedir)" || exit $$?; \
+	done
+
+uninstall-includeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(includedir)'; $(am__uninstall_files_from_dir)
+install-pkgincludeHEADERS: $(pkginclude_HEADERS)
+	@$(NORMAL_INSTALL)
+	@list='$(pkginclude_HEADERS)'; test -n "$(pkgincludedir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(pkgincludedir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(pkgincludedir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(pkgincludedir)'"; \
+	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(pkgincludedir)" || exit $$?; \
+	done
+
+uninstall-pkgincludeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(pkginclude_HEADERS)'; test -n "$(pkgincludedir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(pkgincludedir)'; $(am__uninstall_files_from_dir)
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -806,9 +905,11 @@ distdir: $(DISTFILES)
 check-am: all-am
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(HEADERS)
+install-binPROGRAMS: install-libLTLIBRARIES
+
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)" "$(DESTDIR)$(pkgincludedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -848,8 +949,8 @@ maintainer-clean-generic:
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -869,13 +970,13 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-includeHEADERS install-pkgincludeHEADERS
 
 install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-binPROGRAMS
+install-exec-am: install-binPROGRAMS install-libLTLIBRARIES
 
 install-html: install-html-am
 
@@ -915,24 +1016,28 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS
+uninstall-am: uninstall-binPROGRAMS uninstall-includeHEADERS \
+	uninstall-libLTLIBRARIES uninstall-pkgincludeHEADERS
 
 .MAKE: all check install install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am check check-am clean \
-	clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES cscopelist-am ctags ctags-am distclean \
+	clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool cscopelist-am ctags ctags-am distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-binPROGRAMS install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am uninstall-binPROGRAMS
+	install-exec-am install-html install-html-am \
+	install-includeHEADERS install-info install-info-am \
+	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
+	install-pkgincludeHEADERS install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-includeHEADERS \
+	uninstall-libLTLIBRARIES uninstall-pkgincludeHEADERS
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
