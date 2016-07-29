@@ -29,6 +29,64 @@
 #endif
 
 /** Available contact network models. */
+typedef struct {
+    char *name; /**< Name of network model */
+    int nparam; /**< Number of model parameters */
+    const char **param_names; /**< Names of each parameter */
+    const int *discrete; /**< Whether each parameter is discrete or continuous */
+
+    void (*generate) (igraph_rng_t *rng, const double *theta, igraph_t *net);
+} network_model;
+
+/* Preferential attachment (Barabasi-Albert) model */
+void generate_pa (igraph_rng_t *rng, const double *theta, igraph_t *net) {
+    double N = theta[0], m = theta[1], alpha = theta[2];
+    igraph_barabasi_game(net, (int) N, alpha, (int) m, NULL, 0, 1, 0,
+            IGRAPH_BARABASI_PSUMTREE, NULL, rng);
+}
+static const char *param_names_pa[3] = {"N", "m", "alpha"};
+static const int discrete_pa[3] = {0, 1, 0};
+
+/* GNP (Erdos-Renyi) model */
+void generate_gnp (igraph_rng_t *rng, const double *theta, igraph_t *net) {
+    double N = theta[0], p = theta[1];
+    igraph_erdos_renyi_game(net, IGRAPH_ERDOS_RENYI_GNP, (int) N, p, 0, 0, rng);
+}
+static const char *param_names_gnp[2] = {"N", "p"};
+static const int discrete_gnp[2] = {0, 0};
+
+/* Small world (Watts-Strogatz) model */
+void generate_sw (igraph_rng_t *rng, const double *theta, igraph_t *net) {
+    double N = theta[0], nei = theta[1], p = theta[2];
+    igraph_watts_strogatz_game(net, 1, (int) N, (int) nei, p, 0, 0, rng);
+}
+static const char *param_names_sw[3] = {"N", "nei", "p"};
+static const int discrete_sw[3] = {0, 1, 1};
+
+static const network_model MODELS[3] = {
+    {
+        .name = "pa",
+        .nparam = 3,
+        .param_names = param_names_pa,
+        .discrete = discrete_pa,
+        .generate = generate_pa
+    },
+    {
+        .name = "gnp",
+        .nparam = 2,
+        .param_names = param_names_gnp,
+        .discrete = discrete_gnp,
+        .generate = generate_gnp
+    },
+    {
+        .name = "sw",
+        .nparam = 3,
+        .param_names = param_names_sw,
+        .discrete = discrete_sw,
+        .generate = generate_pa
+    }
+};
+
 typedef enum {
     NET_TYPE_PA = 0,
     NET_TYPE_GNP = 1,
