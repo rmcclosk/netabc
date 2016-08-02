@@ -1,4 +1,15 @@
-config.h.in~
-
 autom4te.cache/
 build/
+Makefile
+c-cmaes/.deps/
+c-cmaes/Makefile
+config.h
+config.h.in~
+config.log
+config.status
+libtool
+src/.deps/
+src/Makefile
+stamp-h1
+tests/.deps/
+tests/Makefile
