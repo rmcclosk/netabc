@@ -38,49 +38,81 @@ typedef struct {
     void (*generate) (igraph_rng_t *rng, const double *theta, igraph_t *net);
 } network_model;
 
+/* Helper function to make an undirected graph bi-directed and add
+ * constant transmission and removal rates */
+void make_sir_network (igraph_t *net, double transmit, double remove) {
+    int i;
+    igraph_vector_t v;
+
+    igraph_to_directed(net, IGRAPH_TO_DIRECTED_MUTUAL);
+
+    igraph_vector_init(&v, igraph_vcount(net));
+    igraph_vector_fill(&v, remove);
+    SETVANV(net, "remove", &v);
+    for (i = 0; i < igraph_vcount(net); ++i) {
+        VECTOR(v)[i] = i;
+    }
+    SETVANV(net, "id", &v);
+
+    igraph_vector_resize(&v, igraph_ecount(net));
+    igraph_vector_fill(&v, transmit);
+    SETEANV(net, "transmit", &v);
+
+    igraph_vector_destroy(&v);
+}
+
 /* Preferential attachment (Barabasi-Albert) model */
 void generate_pa (igraph_rng_t *rng, const double *theta, igraph_t *net) {
     double N = theta[0], m = theta[1], alpha = theta[2];
+    double transmit = theta[3], remove = theta[4];
+    double I = theta[5], time = theta[6];
     igraph_barabasi_game(net, (int) N, alpha, (int) m, NULL, 0, 1, 0,
             IGRAPH_BARABASI_PSUMTREE, NULL, rng);
+    make_sir_network(net, transmit, remove);
 }
-static const char *param_names_pa[3] = {"N", "m", "alpha"};
-static const int discrete_pa[3] = {0, 1, 0};
+static const char *param_names_pa[7] = {"N", "m", "alpha", "transmit_rate", "remove_rate", "I", "time"};
+static const int discrete_pa[7] = {0, 1, 0, 0, 0, 0, 0};
 
 /* GNP (Erdos-Renyi) model */
 void generate_gnp (igraph_rng_t *rng, const double *theta, igraph_t *net) {
     double N = theta[0], p = theta[1];
+    double transmit = theta[2], remove = theta[3];
+    double I = theta[4], time = theta[5];
     igraph_erdos_renyi_game(net, IGRAPH_ERDOS_RENYI_GNP, (int) N, p, 0, 0, rng);
+    make_sir_network(net, transmit, remove);
 }
-static const char *param_names_gnp[2] = {"N", "p"};
-static const int discrete_gnp[2] = {0, 0};
+static const char *param_names_gnp[6] = {"N", "p", "transmit_rate", "remove_rate", "I", "time"};
+static const int discrete_gnp[6] = {0, 0, 0, 0, 0, 0};
 
 /* Small world (Watts-Strogatz) model */
 void generate_sw (igraph_rng_t *rng, const double *theta, igraph_t *net) {
     double N = theta[0], nei = theta[1], p = theta[2];
+    double transmit = theta[3], remove = theta[4];
+    double I = theta[5], time = theta[6];
     igraph_watts_strogatz_game(net, 1, (int) N, (int) nei, p, 0, 0, rng);
+    make_sir_network(net, transmit, remove);
 }
-static const char *param_names_sw[3] = {"N", "nei", "p"};
-static const int discrete_sw[3] = {0, 1, 1};
+static const char *param_names_sw[7] = {"N", "nei", "p", "transmit_rate", "remove_rate", "I", "time"};
+static const int discrete_sw[7] = {0, 1, 1, 0, 0, 0, 0};
 
 static const network_model MODELS[3] = {
     {
         .name = "pa",
-        .nparam = 3,
+        .nparam = 7,
         .param_names = param_names_pa,
         .discrete = discrete_pa,
         .generate = generate_pa
     },
     {
         .name = "gnp",
-        .nparam = 2,
+        .nparam = 6,
         .param_names = param_names_gnp,
         .discrete = discrete_gnp,
         .generate = generate_gnp
     },
     {
         .name = "sw",
-        .nparam = 3,
+        .nparam = 7,
         .param_names = param_names_sw,
         .discrete = discrete_sw,
         .generate = generate_pa
