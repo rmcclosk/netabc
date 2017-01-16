@@ -414,7 +414,7 @@ int _fit_mmpp(const igraph_t *tree, int nrates, double *theta, int trace,
 	            theta[cur++] = tmp[nrates + state_order[i]*(nrates-1) + state_order[j]-1];
         }
     }
-    loglik[0] = likelihood(tree, nrates, theta, w, 1, 0);
+    loglik[0] = likelihood(tree, nrates, theta, w, use_tips, 0);
     if (states != NULL)
         reconstruct(tree, nrates, theta, w, states, use_tips);
 
