@@ -1,3 +1,5 @@
+> **If you are looking for the [Markov-modulated Poisson process (MMPP) clustering method](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005868), please go to the fork of this repository at http://github.com/PoonLab/clmp**
+
 # netabc
 
 netabc is a computer program for fitting contact network models to transmission
